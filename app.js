@@ -19,11 +19,17 @@ const app = express();
 // CORS config
 app.use(
   cors({
-    origin: [process.env.PORTFOLIO_URL, process.env.DASHBOARD_URL],
+    origin: [
+      process.env.PORTFOLIO_URL,
+      process.env.DASHBOARD_URL,
+      process.env.PORTFOLIO_URL_PROD,
+      process.env.DASHBOARD_URL_PROD,
+    ].filter(Boolean), // remove undefined
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
+
 
 // Cookie parser
 app.use(cookieParser());
