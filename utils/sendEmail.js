@@ -2,6 +2,11 @@
 import nodeMailer from "nodemailer";
 
 export const sendEmail = async (options) => {
+  if (!options.email) {
+    throw new Error("Recipient email address is required.");
+  }
+  console.log("Sending email to:", options.email);
+
   try {
     // Validate required environment variables
     const requiredEnvVars = ['SMTP_HOST', 'SMTP_PORT', 'SMTP_SERVICE', 'SMTP_MAIL', 'SMTP_PASSWORD'];
