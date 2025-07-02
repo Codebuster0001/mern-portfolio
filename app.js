@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: "./.env" });
 
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -16,12 +17,25 @@ import userRouter from "./router/UserRoutes.js";
 
 const app = express();
 
+// Compression middleware
+app.use(compression());
+
 // Security headers middleware
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-XSS-Protection', '1; mode=block');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Response time logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    console.log(`${req.method} ${req.originalUrl} - ${ms}ms`);
+  });
   next();
 });
 
