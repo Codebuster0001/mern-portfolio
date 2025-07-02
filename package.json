@@ -1,15 +1,21 @@
 {
-  "name": "backend",
+  "name": "mern-portfolio-backend",
   "version": "1.0.0",
   "main": "server.js",
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "echo 'No build step required for Node.js'",
+    "test": "echo 'No tests specified'"
   },
-  "author": "",
+  "author": "Deepak Kushwaha",
   "license": "ISC",
-  "description": "",
+  "description": "Backend API for MERN Portfolio",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.7.0",

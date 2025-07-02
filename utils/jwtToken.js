@@ -1,12 +1,20 @@
 export const generateToken = (user, message, statusCode, res) => {
   const token = user.generateJsonWebToken();
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: true, // only on HTTPS
-    sameSite: "None", // must be "None" if using cross-site cookies
-    maxAge: 7 * 24 * 60 * 60 * 1000, // optional expiry
-  })
   
+  // Configure cookie based on environment
+  const cookieOptions = {
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  };
+
+  // Only set secure and sameSite for production
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = "None";
+  }
+
+  res.cookie("token", token, cookieOptions)
+    .status(statusCode)
     .json({
       success: true,
       message,

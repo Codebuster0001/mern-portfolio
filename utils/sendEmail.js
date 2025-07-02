@@ -2,22 +2,42 @@
 import nodeMailer from "nodemailer";
 
 export const sendEmail = async (options) => {
-  const transporter = nodeMailer.createTransport({
-    host: process.env.SMPT_HOST,
-    port: process.env.SMPT_PORT,
-    service: process.env.SMPT_SERVICE,
-    auth: {
-      user: process.env.SMPT_MAIL,
-      pass: process.env.SMPT_PASSWORD,
-    },
-  });
+  try {
+    // Validate required environment variables
+    const requiredEnvVars = ['SMPT_HOST', 'SMPT_PORT', 'SMPT_SERVICE', 'SMPT_MAIL', 'SMPT_PASSWORD'];
+    const missingVars = requiredEnvVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
+      console.error('❌ Missing email configuration:', missingVars);
+      throw new Error(`Missing email configuration: ${missingVars.join(', ')}`);
+    }
 
-  const mailOptions = {
-    from: `"Deepak Kushwaha" <${process.env.SMPT_MAIL}>`,
-    to: options.email,
-    subject: options.subject,
-    text: options.message,
-  };
+    const transporter = nodeMailer.createTransporter({
+      host: process.env.SMPT_HOST,
+      port: process.env.SMPT_PORT,
+      service: process.env.SMPT_SERVICE,
+      auth: {
+        user: process.env.SMPT_MAIL,
+        pass: process.env.SMPT_PASSWORD,
+      },
+      secure: process.env.NODE_ENV === 'production', // Use secure connection in production
+      tls: {
+        rejectUnauthorized: false // Only for development/testing
+      }
+    });
 
-  await transporter.sendMail(mailOptions);
+    const mailOptions = {
+      from: `"Deepak Kushwaha" <${process.env.SMPT_MAIL}>`,
+      to: options.email,
+      subject: options.subject,
+      text: options.message,
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Email sent successfully:', info.messageId);
+    return info;
+  } catch (error) {
+    console.error('❌ Email sending failed:', error.message);
+    throw error;
+  }
 };

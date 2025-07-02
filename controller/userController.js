@@ -1,10 +1,10 @@
 import { v2 as cloudinary } from "cloudinary";
-import { User } from "../models/UserSchema.js";
+import crypto from "crypto";
 import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import { ErrorHandler } from "../middlewares/error.js";
+import { User } from "../models/UserSchema.js";
 import { generateToken } from "../utils/jwtToken.js";
 import { sendEmail } from "../utils/sendEmail.js";
-import crypto from "crypto";
 
 // Register
 export const register = catchAsyncErrors(async (req, res, next) => {
@@ -63,23 +63,34 @@ export const register = catchAsyncErrors(async (req, res, next) => {
 // Login
 export const login = catchAsyncErrors(async (req, res, next) => {
   const { email, password } = req.body;
+  
   if (!email || !password)
     return next(new ErrorHandler("Provide Email and Password!", 400));
 
   const user = await User.findOne({ email }).select("+password");
-  if (!user || !(await user.comparePassword(password)))
+  
+  if (!user || !(await user.comparePassword(password))) {
     return next(new ErrorHandler("Invalid Email or Password", 401));
+  }
 
   generateToken(user, "Login Successful", 200, res);
 });
 
 // Logout
 export const logout = catchAsyncErrors(async (req, res) => {
+  const cookieOptions = {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  };
+
+  // Only set secure and sameSite for production
+  if (process.env.NODE_ENV === "production") {
+    cookieOptions.secure = true;
+    cookieOptions.sameSite = "None";
+  }
+
   res
-    .cookie("token", "", {
-      httpOnly: true,
-      expires: new Date(Date.now()),
-    })
+    .cookie("token", "", cookieOptions)
     .status(200)
     .json({ success: true, message: "Logged Out!" });
 });
