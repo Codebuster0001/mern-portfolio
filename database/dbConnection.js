@@ -15,8 +15,7 @@ export const dbConnection = () => {
       maxPoolSize: 10,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
-      bufferCommands: false,
-      bufferMaxEntries: 0,
+      bufferCommands: false
     })
     .then(() => {
       console.log("✅ Connected to MongoDB database!");
