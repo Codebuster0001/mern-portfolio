@@ -15,8 +15,14 @@ export const sendMessage = catchAsyncErrors(async (req, res, next) => {
   const newMessage = await Message.create({ name, email, message });
 
   // Admin Alert
+  const adminEmail = process.env.SMTP_MAIL;
+  console.log("Admin email:", adminEmail);
+  console.log("User email:", email);
+  if (!adminEmail) {
+    return next(new ErrorHandler("Admin email address is not configured.", 500));
+  }
   await sendEmail({
-    email: process.env.SMPT_MAIL,
+    email: adminEmail,
     subject: `📬 New Contact Message from ${name}`,
     message: `You received a new message:\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
   });
@@ -25,7 +31,7 @@ export const sendMessage = catchAsyncErrors(async (req, res, next) => {
   await sendEmail({
     email,
     subject: `👋 Thank you for contacting Deepak Kushwaha`,
-    message: `Hi ${name},\n\nThank you for your message! I’ve received it and will get back to you soon.\n\nYou wrote:\n"${message}"\n\nRegards,\nDeepak Kushwaha`,
+    message: `Hi ${name},\n\nThank you for your message! I've received it and will get back to you soon.\n\nYou wrote:\n"${message}"\n\nRegards,\nDeepak Kushwaha`,
   });
 
   res.status(201).json({
